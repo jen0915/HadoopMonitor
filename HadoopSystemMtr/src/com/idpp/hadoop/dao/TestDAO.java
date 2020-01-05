@@ -13,7 +13,7 @@ import com.idpp.hadoop.dto.ResponseModel;
 public class TestDAO {
 
 	private static TestDAO instance;
-	private SqlSessionFactory factory;
+	private static SqlSessionFactory factory;
 
 	public static TestDAO getInstance() {
 		if(instance == null) {
@@ -36,7 +36,7 @@ public class TestDAO {
 	}
 	
 	//호스트정보 등록
-	public void insertAmbariHostInfo(ResponseModel model) {
+	public static void insertAmbariHostInfo(ResponseModel model) {
 		SqlSession sqlSession = factory.openSession();
 		sqlSession.insert("testSQL.insertAmbariHostInfo", model);
 		sqlSession.commit();
@@ -44,7 +44,7 @@ public class TestDAO {
 	}
 	
 	//HDFS 성능 등록
-	public void insertHdfsOverall (ResponseModel model) {
+	public static void insertHdfsOverall (ResponseModel model) {
 		SqlSession sqlSession = factory.openSession();
 		sqlSession.insert("testSQL.insertHdfsOverall", model);
 		sqlSession.commit();
@@ -52,7 +52,7 @@ public class TestDAO {
 	}
 	
 	//HDFS node상태 등록
-	public void insertNodeState (ResponseModel model) {
+	public static void insertNodeState (ResponseModel model) {
 		SqlSession sqlSession = factory.openSession();
 		sqlSession.insert("testSQL.insertNodeState", model);
 		sqlSession.commit();
@@ -60,7 +60,7 @@ public class TestDAO {
 	}
 	
 	//HDFS 호스트 컴포넌트 등록
-	public void insertHostRole (ResponseModel model) {
+	public static void insertHostRole (ResponseModel model) {
 		SqlSession sqlSession = factory.openSession();
 		sqlSession.insert("testSQL.insertHostRole", model);
 		sqlSession.commit();

@@ -2,12 +2,12 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/junghwalee/Downloads/mybatis-3.5.3.jar"/>
-	<classpathentry kind="lib" path="C:/Users/junghwalee/Downloads/mysql-connector-java-5.1.29.jar"/>
-	<classpathentry kind="lib" path="C:/Users/junghwalee/Downloads/httpcomponents-client-4.5.10-bin/httpcomponents-client-4.5.10/lib/httpclient-4.5.10.jar"/>
-	<classpathentry kind="lib" path="C:/Users/junghwalee/Downloads/httpcomponents-client-4.5.10-bin/httpcomponents-client-4.5.10/lib/httpcore-4.4.12.jar"/>
-	<classpathentry kind="lib" path="C:/Users/junghwalee/Downloads/commons-logging-1.2-bin/commons-logging-1.2/commons-logging-1.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/junghwalee/Downloads/json_simple-1.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/junghwalee/Downloads/commons-codec-1.8.jar/commons-codec-1.8.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ljh95/Downloads/httpcomponents-client-4.5.10-bin/httpcomponents-client-4.5.10/lib/httpclient-4.5.10.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ljh95/Downloads/httpcomponents-core-4.4.12-bin/httpcomponents-core-4.4.12/lib/httpcore-4.4.12.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ljh95/Downloads/jar_files/mysql-connector-java-5.1.29.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ljh95/Downloads/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ljh95/Downloads/json_simple-1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ljh95/Downloads/mybatis-3.5.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/ljh95/Downloads/commons-codec-1.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
