@@ -515,11 +515,8 @@ public class MonitorMain {
 					}catch(Exception e){
 						e.printStackTrace();
 					}
-					
-					
 				}
 	        }
-		//catch
 		}catch(Exception e) {
 			e.printStackTrace();
 	 }
