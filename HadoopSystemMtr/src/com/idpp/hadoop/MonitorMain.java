@@ -39,6 +39,21 @@ public class MonitorMain {
 		return jarr;
 	}
 	
+	public static void main(String[] args) throws ParseException {
+		MonitorMain main = new MonitorMain();
+		String name = "admin";
+        String password = "QKDqwer1234!@";
+
+        String authString = name + ":" + password;
+        byte[] authEncBytes = Base64.getEncoder().encode(authString.getBytes());
+        String authStringEnc = new String(authEncBytes);
+		
+        main.getNameNode(authStringEnc);
+//        main.getHostState(authStringEnc);
+//        main.getNodeCntState(authStringEnc);
+//        main.getNodeRoles(authStringEnc);
+	}
+	
 	public void getNameNode(String authStringEnc) {
 		String requestURL = "http://50.100.100.11:8080/api/v1/clusters/idpp/services/HDFS/components/NAMENODE?fields=metrics/cpu,metrics/jvm,metrics/dfs";
 		
@@ -122,20 +137,7 @@ public class MonitorMain {
 		}
 	}
 
-	public static void main(String[] args) throws ParseException {
-		MonitorMain main = new MonitorMain();
-		String name = "admin";
-        String password = "QKDqwer1234!@";
 
-        String authString = name + ":" + password;
-        byte[] authEncBytes = Base64.getEncoder().encode(authString.getBytes());
-        String authStringEnc = new String(authEncBytes);
-		
-        main.getNameNode(authStringEnc);
-        main.getHostState(authStringEnc);
-        main.getNodeCntState(authStringEnc);
-        main.getNodeRoles(authStringEnc);
-	}
 
 	private void getNodeRoles(String authStringEnc) {
 		List<ResponseModel> list = new ArrayList<ResponseModel>();

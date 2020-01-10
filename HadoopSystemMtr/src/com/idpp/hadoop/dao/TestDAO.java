@@ -13,7 +13,9 @@ import com.idpp.hadoop.dto.ResponseModel;
 public class TestDAO {
 
 	private static TestDAO instance;
-	private static SqlSessionFactory factory;
+//	private static SqlSessionFactory factory;
+	
+	static SqlSessionFactory factory = SqlMapSessionFactory.getSqlSessionFactory();
 
 	public static TestDAO getInstance() {
 		if(instance == null) {
@@ -25,15 +27,15 @@ public class TestDAO {
 	}
 
 	//constructor
-	public TestDAO() {
-
-		try {
-			Reader reader = Resources.getResourceAsReader("mybatis-config.xml");
-			factory = new SqlSessionFactoryBuilder().build(reader);
-		}catch(IOException e) {
-			e.printStackTrace();
-		}
-	}
+//	public TestDAO() {
+//
+//		try {
+//			Reader reader = Resources.getResourceAsReader("mybatis-config.xml");
+//			factory = new SqlSessionFactoryBuilder().build(reader);
+//		}catch(IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 	
 	//호스트정보 등록
 	public static void insertAmbariHostInfo(ResponseModel model) {
