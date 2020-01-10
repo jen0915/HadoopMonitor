@@ -15,7 +15,7 @@ public class TestDAO {
 	private static TestDAO instance;
 //	private static SqlSessionFactory factory;
 	
-	static SqlSessionFactory factory = SqlMapSessionFactory.getSqlSessionFactory();
+	private static SqlSessionFactory factory = SqlMapSessionFactory.getSqlSessionFactory();
 
 	public static TestDAO getInstance() {
 		if(instance == null) {

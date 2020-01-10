@@ -12,8 +12,9 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 public class SqlMapSessionFactory {
 
 	public static SqlSessionFactory ssf;
+	public static SqlSession session = null;
 	
-	static {
+	public void demo() {
 		
 		
 		String resource = "mybatis-config.xml";
@@ -24,7 +25,6 @@ public class SqlMapSessionFactory {
 		prop.put("username", "dev");
 		prop.put("password", "qwer1234!@");
 		
-		SqlSession session = null;
 		
 		try {
 			InputStream inputStream = Resources.getResourceAsStream(resource);
