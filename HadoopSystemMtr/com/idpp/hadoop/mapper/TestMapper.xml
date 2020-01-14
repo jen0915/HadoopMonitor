@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="testSQL">
+
+<insert id="insertFSCapacityUsed" parameterType="Map">
+	INSERT INTO 
+		TESTTABLE 
+		(CAPACITY_USED)
+	VALUES
+		(#{CAPACITY_USED})
+	
+</insert>
+
+<insert id="insertAmbariHostInfo" parameterType="Map">
+	INSERT INTO 
+		TB_AMBARI_HOSTS
+	(
+		HOST_INDEX,
+		HOST_NAME,
+		HOST_IP,
+		HOST_STATE_CODE,
+		HOST_STATUS_CODE,
+		HOST_CPU_IDLE,
+		HOST_DISK_FREE,
+		HOST_DISK_TOTAL,
+		HOST_DISK_USAGE_RATE,
+		HOST_MEM_FREE,
+		HOST_MEM_TOTAL,
+		LAST_CHECK_TIME
+	)
+	VALUES
+	(
+		#{HOST_INDEX},
+		#{HOST_NAME},
+		#{HOST_IP},
+		(SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 1 AND HEALTH_CODE_NM = #{HOST_STATE_CODE}),
+		(SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 2 AND HEALTH_CODE_NM = #{HOST_STATUS_CODE}),
+		#{HOST_CPU_IDLE},
+		#{HOST_DISK_FREE},
+		#{HOST_DISK_TOTAL},
+		#{HOST_DISK_USAGE_RATE},
+		#{HOST_MEM_FREE},
+		#{HOST_MEM_TOTAL},
+		#{LAST_CHECK_TIME}
+	)
+</insert>
+
+<insert id="insertHdfsOverall" parameterType="Map">
+	INSERT INTO 
+		TB_HDFS_OVERALL
+	(
+		CPU_IDLE,
+		NAMENODE_HEAP_USED,
+		NAMENODE_HEAP_COMMITTED,
+		DFS_DISK_TOTAL,
+		DFS_DISK_USED,
+		DFS_DISK_USED_PERCENT,
+		DFS_DISK_REMAINING,
+		DFS_DISK_REMAINING_PERCENT,
+		LAST_CHECK_TIME
+	)
+	VALUES
+		(
+			#{CPU_IDLE},
+			#{NAMENODE_HEAP_USED},
+			#{NAMENODE_HEAP_COMMITTED},
+			#{DFS_DISK_TOTAL},
+			#{DFS_DISK_USED},
+			#{DFS_DISK_USED_PERCENT},
+			#{DFS_DISK_REMAINING},
+			#{DFS_DISK_REMAINING_PERCENT},
+			#{LAST_CHECK_TIME}
+		)
+</insert>
+
+<insert id="insertNodeState" parameterType="Map">
+	INSERT INTO 
+		TB_HDFS_NODE_STATE
+	(
+		NAMENODE_STATUS,
+		SNAMENODE_STATUS,
+		LIVE_DATANODE_CNT,
+		TOTAL_DATANODE_CNT,
+		DATANODE_STATE,
+		LAST_CHECK_TIME
+	)
+	VALUES
+		(
+			#{NAMENODE_STATUS},
+			#{SNAMENODE_STATUS},
+			#{LIVE_DATANODE_CNT},
+			#{TOTAL_DATANODE_CNT},
+			#{DATANODE_STATE},
+			#{LAST_CHECK_TIME}
+		)
+</insert>
+
+<insert id="insertHostRole" parameterType = "Map">
+	INSERT INTO 
+		TB_AMBARI_HOST_ROLE
+	(
+		HOST_NAME,
+		HOST_COMPONENT_CODE
+	)
+	VALUES
+	(
+		#{HOST_NAME},
+		(
+		SELECT COMPONENT_CODE FROM TB_HOST_ROLES_COMPONENT
+			WHERE COMPONENT_CODE_NM = 
+			#{COMPONENT_CODE_NM}
+		)
+	)
+</insert>
+</mapper>
