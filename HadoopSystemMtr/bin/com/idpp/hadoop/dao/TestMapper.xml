@@ -97,7 +97,7 @@
 		)
 </insert>
 
-<insert id="insertHostRole" parameterType = "com.example.demo.dto.ResponseModel">
+<insert id="insertHostRole" parameterType = "Map">
 	INSERT INTO 
 		TB_AMBARI_HOST_ROLE
 	(

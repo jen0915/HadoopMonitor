@@ -1,6 +1,5 @@
 package com.idpp.hadoop.dto;
 
-import java.sql.Date;
 
 public class ResponseModel {
 

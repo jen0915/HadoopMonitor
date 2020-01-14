@@ -50,12 +50,12 @@ public class MonitorMain {
 		
         main.getNameNode(authStringEnc);
 //        main.getHostState(authStringEnc);
-//        main.getNodeCntState(authStringEnc);
+//        main.getNodeCntState(authStringEnc); 
 //        main.getNodeRoles(authStringEnc);
 	}
 	
 	public void getNameNode(String authStringEnc) {
-		String requestURL = "http://50.100.100.11:8080/api/v1/clusters/idpp/services/HDFS/components/NAMENODE?fields=metrics/cpu,metrics/jvm,metrics/dfs";
+		String requestURL = "http://50.100.100.11:8080/api/v1/clusters/idpp/services/HDFS/components/NAMENODE?fields=metrics/dfs,metrics/cpu,metrics/jvm";
 		
 		try {
 			/*
@@ -257,9 +257,8 @@ public class MonitorMain {
 				list.add(model3);
 			}
 	        
-	        for(ResponseModel Rmodel : list) {
-				TestDAO.insertHostRole(Rmodel);
-			}
+	        TestDAO.insertHostRole(list);
+	        
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -357,12 +356,16 @@ public class MonitorMain {
 			String HostRoles = jobj.get("HostRoles").toString();
 			String namenodeNM = JsonParsing(HostRoles, "host_name");
 			
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			String timenow = sdf.format(System.currentTimeMillis());
+			
 			ResponseModel model = new ResponseModel();
 			model.setNAMENODE_STATUS(nameState);
 			model.setSNAMENODE_STATUS(sec_state);
 			model.setLIVE_DATANODE_CNT(livenodeCnt);
 			model.setTOTAL_DATANODE_CNT(totalCnt);
 			model.setDATANODE_STATE(datanodeState);
+			model.setLAST_CHECK_TIME(timenow);
 			
 			TestDAO.insertNodeState(model);
 			
@@ -403,7 +406,7 @@ public class MonitorMain {
 				String host_nm = JsonParsing(Host, "host_name");
 				
 				//lake1.idpp.com ~ lake8.idpp.com 까지 출력
-//				System.out.println(host_nm);  
+				System.out.println(host_nm);  
 				hostList.add(host_nm);
 				
 				
@@ -417,8 +420,9 @@ public class MonitorMain {
 					String host_ip="";
 					String host_status="";
 					
+					
 					try {
-						URL host_url = new URL(requestURL);
+						URL host_url = new URL(stateUrl);
 				        URLConnection host_urlConnection = host_url.openConnection();
 				        host_urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
 				        InputStream inputS = host_urlConnection.getInputStream();
@@ -432,6 +436,7 @@ public class MonitorMain {
 				        }
 				        String host_result = stb.toString();
 				        
+				        System.out.println("host_result : " + host_result);
 				        String json_hosts = JsonParsing(host_result, "Hosts");
 						host_state = JsonParsing(json_hosts, "host_state");
 						host_ip = JsonParsing(json_hosts, "ip");

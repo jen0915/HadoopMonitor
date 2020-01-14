@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="C:/Users/junghwalee/Downloads/json_simple-1.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/junghwalee/Downloads/mybatis-3.5.3.jar"/>
 	<classpathentry kind="lib" path="C:/Users/junghwalee/Downloads/mysql-connector-java-5.1.29.jar"/>
+	<classpathentry kind="lib" path="C:/Users/junghwalee/Downloads/mariadb-java-client-2.4.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
