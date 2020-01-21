@@ -97,7 +97,7 @@
 		)
 </insert>
 
-<insert id="insertHostRole" parameterType = "Map">
+<insert id="insertHostRole" parameterType = "java.util.HashMap">
 	INSERT INTO 
 		TB_AMBARI_HOST_ROLE
 	(
