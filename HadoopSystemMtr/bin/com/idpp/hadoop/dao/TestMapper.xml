@@ -11,7 +11,7 @@
 	
 </insert>
 
-<insert id="insertAmbariHostInfo" parameterType="Map">
+<insert id="insertAmbariHostInfo" parameterType="java.util.HashMap">
 	INSERT INTO 
 		TB_AMBARI_HOSTS
 	(
@@ -29,7 +29,26 @@
 		LAST_CHECK_TIME
 	)
 	VALUES
+	
+	<foreach item="item" index="index" collection="statelist" separator=",">
 	(
+		#{item.HOST_INDEX},
+		#{item.HOST_NAME},
+		#{item.HOST_IP},
+		(SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 1 AND HEALTH_CODE_NM = #{item.HOST_STATE_CODE}),
+		(SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 2 AND HEALTH_CODE_NM = #{item.HOST_STATUS_CODE}),
+		#{item.HOST_CPU_IDLE},
+		#{item.HOST_DISK_FREE},
+		#{item.HOST_DISK_TOTAL},
+		#{item.HOST_DISK_USAGE_RATE},
+		#{item.HOST_MEM_FREE},
+		#{item.HOST_MEM_TOTAL},
+		#{item.LAST_CHECK_TIME}
+	)
+	</foreach>
+<!-- 	(
 		#{HOST_INDEX},
 		#{HOST_NAME},
 		#{HOST_IP},
@@ -44,7 +63,7 @@
 		#{HOST_MEM_FREE},
 		#{HOST_MEM_TOTAL},
 		#{LAST_CHECK_TIME}
-	)
+	) -->
 </insert>
 
 <insert id="insertHdfsOverall" parameterType="Map">
@@ -105,13 +124,123 @@
 		HOST_COMPONENT_CODE
 	)
 	VALUES
+	<foreach item="item" index="index" collection="list" separator=",">
 	(
-		#{HOST_NAME},
+		#{item.HOST_NAME},
 		(
 		SELECT COMPONENT_CODE FROM TB_HOST_ROLES_COMPONENT
 			WHERE COMPONENT_CODE_NM = 
-			#{COMPONENT_CODE_NM}
+			#{item.COMPONENT_CODE_NM}
 		)
+	)
+	</foreach>
+	
+</insert>
+
+<!-- <insert id="insertHostState" parameterType="java.util.HashMap">
+<choose>
+	<when test="list.size != 0">
+		<foreach item="item" index="index" collection="list" separator="," >
+	INSERT into 
+		TB_AMBARI_HOSTS_STATUS_INFO
+	SET
+		
+		HOST_IDX = #{item.HOST_INDEX},
+		HOST_NAME = #{item.HOST_NAME},
+		HOST_IP = #{item.HOST_IP},
+		HOST_STATE_CODE = (SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 1 AND HEALTH_CODE_NM = #{item.HOST_STATE_CODE}),
+		HOST_STATUS_CODE = (SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 2 AND HEALTH_CODE_NM = #{item.HOST_STATUS_CODE}),
+		LAST_CHECK_TIME = #{item.LAST_CHECK_TIME}
+	
+	ON DUPLICATE KEY 
+	UPDATE 
+		HOST_IP=#{item.HOST_IP},
+		HOST_STATE_CODE = (SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 1 AND HEALTH_CODE_NM = #{item.HOST_STATE_CODE}),
+		HOST_STATUS_CODE = (SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 2 AND HEALTH_CODE_NM = #{item.HOST_STATUS_CODE}),
+		LAST_CHECK_TIME = #{item.LAST_CHECK_TIME}
+	</foreach>
+</when>
+</choose>
+</insert> -->
+
+<insert id="insertHostState" parameterType="java.util.List">
+	INSERT into 
+		TB_AMBARI_HOSTS_STATUS_INFO
+	SET
+		
+		HOST_INDEX = #{HOST_INDEX},
+		HOST_NAME = #{HOST_NAME},
+		HOST_IP = #{HOST_IP},
+		HOST_STATE_CODE = (SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 1 AND HEALTH_CODE_NM = #{HOST_STATE_CODE}),
+		HOST_STATUS_CODE = (SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 2 AND HEALTH_CODE_NM = #{HOST_STATUS_CODE}),
+		LAST_CHECK_TIME = #{LAST_CHECK_TIME}
+	
+	ON DUPLICATE KEY 
+	UPDATE 
+		HOST_IP=#{HOST_IP},
+		HOST_STATE_CODE = (SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 1 AND HEALTH_CODE_NM = #{HOST_STATE_CODE}),
+		HOST_STATUS_CODE = (SELECT HEALTH_TYPE FROM TB_HOST_HEALTH_CODE
+			WHERE HEALTH_CODE = 2 AND HEALTH_CODE_NM = #{HOST_STATUS_CODE}),
+		LAST_CHECK_TIME = #{LAST_CHECK_TIME}
+</insert>
+
+
+
+<insert id="insertHostPerform" parameterType="java.util.List">
+	INSERT INTO 
+		TB_AMBARI_HOSTS_PERFORM_INFO
+	(
+		HOST_NAME,
+		HOST_CPU_IDLE,
+		HOST_DISK_FREE,
+		HOST_DISK_TOTAL,
+		HOST_DISK_USAGE_RATE,
+		HOST_MEM_FREE,
+		HOST_MEM_TOTAL,
+		LAST_CHECK_TIME
+	)
+	VALUES
+	(
+		#{HOST_NAME},
+		#{HOST_CPU_IDLE},
+		#{HOST_DISK_FREE},
+		#{HOST_DISK_TOTAL},
+		#{HOST_DISK_USAGE_RATE},
+		#{HOST_MEM_FREE},
+		#{HOST_MEM_TOTAL},
+		#{LAST_CHECK_TIME}
+	)
+	
+</insert>
+
+<insert id="insertLakeDiskInfo" parameterType="java.util.List">
+	INSERT INTO 
+		IDPP_SERVER_DISK
+	(
+		SERVER_NM,
+		DISK_NM,
+		DISK_TOTAL,
+		DISK_USED,
+		DISK_PERCENT,
+		DISK_AVAILABLE,
+		UPDATE_TIME
+	)
+	VALUES
+	(
+		#{SERVER_NM},
+		#{DISK_NM},
+		#{DISK_TOTAL},
+		#{DISK_USED},
+		#{DISK_PERCENT},
+		#{DISK_AVAILABLE},
+		#{UPDATE_TIME}
 	)
 </insert>
 </mapper>

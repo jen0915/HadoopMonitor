@@ -6,7 +6,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -14,6 +16,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.idpp.hadoop.dao.TestDAO;
+import com.idpp.hadoop.dto.DiskInfoVO;
 import com.idpp.hadoop.dto.ResponseModel;
 
 public class MonitorService {
@@ -38,25 +41,35 @@ public class MonitorService {
 		return jarr;
 	}
 	
+	public static String GetRestResponse(String requesturl, String authStringEnc) {
+		String result = "";
+		try {
+			URL url = new URL(requesturl);
+	        URLConnection url_connection = url.openConnection();
+	        url_connection.setRequestProperty("Authorization", "Basic " + authStringEnc);
+	        InputStream is = url_connection.getInputStream();
+	        InputStreamReader isr = new InputStreamReader(is);
+
+	        int numCharsReadCnt;
+	        char[] charArr = new char[1024];
+	        StringBuffer sb = new StringBuffer();
+	        while ((numCharsReadCnt = isr.read(charArr)) > 0) {
+	        	sb.append(charArr, 0, numCharsReadCnt);
+	        }
+	        result = sb.toString();
+	        
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+	
 	public static void getNameNode(String authStringEnc) {
 		String requestURL = "http://50.100.100.11:8080/api/v1/clusters/idpp/services/HDFS/components/NAMENODE?fields=metrics/dfs,metrics/cpu,metrics/jvm";
 		
 		try {
-
-	        URL url = new URL(requestURL);
-	        URLConnection urlConnection = url.openConnection();
-	        urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-	        InputStream is = urlConnection.getInputStream();
-	        InputStreamReader isr = new InputStreamReader(is);
-
-	        int numCharsRead;
-	        char[] charArray = new char[1024];
-	        StringBuffer sb = new StringBuffer();
-	        while ((numCharsRead = isr.read(charArray)) > 0) {
-	            sb.append(charArray, 0, numCharsRead);
-	        }
-	        String result = sb.toString();
-	        
+			String result = GetRestResponse(requestURL, authStringEnc);
+	       
 	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			String timenow = sdf.format(System.currentTimeMillis());
 
@@ -100,8 +113,8 @@ public class MonitorService {
 			model.setCPU_IDLE(cpu_idle);
 			model.setNAMENODE_HEAP_USED(namenode_heap_used);
 			model.setNAMENODE_HEAP_COMMITTED(namenode_heap_committed);
-			model.setDFS_DISK_TOTAL(CapacityTotalGB);
-			model.setDFS_DISK_USED(CapacityUsedGB);
+			model.setDFS_DISK_TOTAL(CapacityTotalGB); //분산시스템 디스크 총량
+			model.setDFS_DISK_USED(CapacityUsedGB); //분산시스템 디스크 사용량
 			model.setDFS_DISK_USED_PERCENT(PercentUsed);
 			model.setDFS_DISK_REMAINING(CapacityRemainingGB);
 			model.setDFS_DISK_REMAINING_PERCENT(PercentRemaining);
@@ -113,32 +126,15 @@ public class MonitorService {
 		}
 	}
 	
-	public static void getHostState(String authStringEnc) throws ParseException {
+	public static void getHostList(String authStringEnc) throws ParseException {
 		String requestURL = "http://50.100.100.11:8080/api/v1/clusters/idpp/hosts";
 		JSONArray h_arr;
-		List<ResponseModel> statelist = new ArrayList<ResponseModel>();
 		
 		try {
-			URL url = new URL(requestURL);
-	        URLConnection urlConnection = url.openConnection();
-	        urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-	        InputStream is = urlConnection.getInputStream();
-	        InputStreamReader isr = new InputStreamReader(is);
-
-	        int numCharsRead;
-	        char[] charArray = new char[1024];
-	        StringBuffer sb = new StringBuffer();
-	        while ((numCharsRead = isr.read(charArray)) > 0) {
-	            sb.append(charArray, 0, numCharsRead);
-	        }
-	        String result = sb.toString();
-	        System.out.println("result : " + result);
-		
+			String result = GetRestResponse(requestURL, authStringEnc);
 	        
 	        h_arr = JsonArrayParsing(result, "items");
 	      
-		 
-		
 	        for(int i=0; i<h_arr.size(); i++) {
 	        	JSONObject hostobj = (JSONObject)h_arr.get(i);
 	        	
@@ -148,130 +144,129 @@ public class MonitorService {
 				//lake1.idpp.com ~ lake8.idpp.com 까지 출력
 				System.out.println(host_nm);  
 				hostList.add(host_nm);
-				
-				
-				//호스트 정보 조회하면서 host_state, host ip, cpu_count, os_type 등  얻을 수 있음
-				
-				//test//lake1 ~8 까지 한꺼번에 했을때 시간이 좀 걸림
-//				if(i ==0) {
-					String stateUrl = "http://50.100.100.11:8080/api/v1/clusters/idpp/hosts/" + host_nm + "?fields=Hosts/host_state,Hosts/ip,Hosts/host_status";
-					
-					String host_state="";
-					String host_ip="";
-					String host_status="";
-					
-					
-					try {
-						URL host_url = new URL(stateUrl);
-				        URLConnection host_urlConnection = host_url.openConnection();
-				        host_urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-				        InputStream inputS = host_urlConnection.getInputStream();
-				        InputStreamReader inputSR = new InputStreamReader(inputS);
-
-				        int numCharsReadCnt;
-				        char[] charArr = new char[1024];
-				        StringBuffer stb = new StringBuffer();
-				        while ((numCharsReadCnt = inputSR.read(charArr)) > 0) {
-				        	stb.append(charArr, 0, numCharsReadCnt);
-				        }
-				        String host_result = stb.toString();
-				        
-				        System.out.println("host_result : " + host_result);
-				        String json_hosts = JsonParsing(host_result, "Hosts");
-						host_state = JsonParsing(json_hosts, "host_state");
-						host_ip = JsonParsing(json_hosts, "ip");
-						host_status = JsonParsing(json_hosts, "host_status");
-						
-						System.out.println("host name : " + host_nm);
-						System.out.println("host_state : " + host_state);
-						System.out.println("host_ip : " + host_ip);
-						System.out.println("host_status : " + host_status);
-						
-					}catch(Exception e) {
-						e.printStackTrace();
-					}
-					
-					
-					/* cpu, disk, memory 정보 조회 */
-					
-					String host_metrics_url = "http://50.100.100.11:8080/api/v1/clusters/idpp/hosts/" + host_nm + "?fields=metrics/disk,metrics/cpu,metrics/memory";
-					String metrics = "";
-					String cpu = "";
-					String disk = "";
-					String mem = "";
-					try {
-						URL cdmUrl = new URL(host_metrics_url);
-				        URLConnection cdm_urlConnection = cdmUrl.openConnection();
-				        cdm_urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-				        InputStream inputS = cdm_urlConnection.getInputStream();
-				        InputStreamReader inputSR = new InputStreamReader(inputS);
-
-				        int numCharsReadCnt;
-				        char[] charArr = new char[1024];
-				        StringBuffer buf = new StringBuffer();
-				        while ((numCharsReadCnt = inputSR.read(charArr)) > 0) {
-				        	buf.append(charArr, 0, numCharsReadCnt);
-				        }
-				        String cdm_result = buf.toString();
-				        
-				        metrics = JsonParsing(cdm_result, "metrics");
-						
-					}catch(Exception e) {
-						e.printStackTrace();
-					}
-					
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					String timenow = sdf.format(System.currentTimeMillis());
-					
-					cpu = JsonParsing(metrics, "cpu");
-					disk = JsonParsing(metrics, "disk");
-					mem = JsonParsing(metrics, "memory");
-					
-					
-					String cpu_idle = JsonParsing(cpu, "cpu_idle");
-					String disk_free = JsonParsing(disk, "disk_free");
-					String disk_total = JsonParsing(disk, "disk_total");
-					String disk_usage_rate = String.format("%.2f", (Double.parseDouble(disk_total)-Double.parseDouble(disk_free))*100/Double.parseDouble(disk_total));
-					String mem_free = JsonParsing(mem, "mem_free");
-					String mem_total = JsonParsing(mem, "mem_total");
-					
-					System.out.println("cpu_idle : " + cpu_idle);
-					System.out.println("disk free : " + disk_free);
-					System.out.println("disk total : " + disk_total);
-					System.out.println("disk usage rate : " + disk_usage_rate);
-					System.out.println("mem free : " + mem_free);
-					System.out.println("mem_total : " + mem_total);
-					
-					
-					ResponseModel model = new ResponseModel();
-					model.setHOST_NAME(host_nm);
-					model.setHOST_INDEX(i+1);
-					model.setHOST_IP(host_ip);
-					model.setHOST_STATE_CODE(host_state);
-					model.setHOST_STATUS_CODE(host_status);
-					model.setHOST_CPU_IDLE(cpu_idle);
-					model.setHOST_DISK_FREE(disk_free);
-					model.setHOST_DISK_TOTAL(disk_total);
-					model.setHOST_DISK_USAGE_RATE(disk_usage_rate);
-					model.setHOST_MEM_FREE(mem_free);
-					model.setHOST_MEM_TOTAL(mem_total);
-					model.setLAST_CHECK_TIME(timenow);
-					
-				
-					statelist.add(model);
-					
-					
-					
-					
-//				}//if(i==0) end
 	        }
+				
+	        InsertStateInfo(hostList, authStringEnc);
 	        
-	        TestDAO.insertAmbariHostInfo(statelist);
+	        InsertPerformInfo(hostList, authStringEnc);
+				
+				
 		}catch(Exception e) {
 			e.printStackTrace();
 	 }
 	}
 	
+
+	private static void InsertPerformInfo(List<String> hostList, String authStringEnc) {
+		List<ResponseModel> performlist = new ArrayList<ResponseModel>();
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String timenow = sdf.format(System.currentTimeMillis());
+		
+		for(int i=0; i<hostList.size(); i++) {
+			String url = "http://50.100.100.11:8080/api/v1/clusters/idpp/hosts/" + hostList.get(i) + "?fields=metrics/disk,metrics/cpu,metrics/memory";
+			String metrics = "";
+			String cpu = "";
+			String disk = "";
+			String mem = "";
+			
+			try {
+				String result = GetRestResponse(url, authStringEnc);
+		        
+		        metrics = JsonParsing(result, "metrics");
+				
+		        cpu = JsonParsing(metrics, "cpu");
+				disk = JsonParsing(metrics, "disk");
+				mem = JsonParsing(metrics, "memory");
+				
+				
+				String cpu_idle = JsonParsing(cpu, "cpu_idle");
+				String disk_free = JsonParsing(disk, "disk_free");
+				String disk_total = JsonParsing(disk, "disk_total");
+				String disk_usage_rate = String.format("%.2f", (Double.parseDouble(disk_total)-Double.parseDouble(disk_free))*100/Double.parseDouble(disk_total));
+				String mem_free = JsonParsing(mem, "mem_free");
+				String mem_total = JsonParsing(mem, "mem_total");
+				
+				ResponseModel model = new ResponseModel();
+				model.setHOST_NAME(hostList.get(i));
+				model.setHOST_CPU_IDLE(cpu_idle);
+				model.setHOST_DISK_FREE(disk_free);
+				model.setHOST_DISK_TOTAL(disk_total);
+				model.setHOST_DISK_USAGE_RATE(disk_usage_rate);
+				model.setHOST_MEM_FREE(mem_free);
+				model.setHOST_MEM_TOTAL(mem_total);
+				model.setLAST_CHECK_TIME(timenow);
+				
+				
+				performlist.add(model);
+				
+			}catch(NullPointerException npe) {
+				InsertPerformInfo(hostList, authStringEnc);
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+		try {
+			TestDAO.insertHostPerformInfo(performlist);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void InsertStateInfo(List<String> hostList, String authStringEnc) {
+		List<ResponseModel> statelist = new ArrayList<ResponseModel>();
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String timenow = sdf.format(System.currentTimeMillis());
+		
+		for(int i=0; i<hostList.size(); i++) {
+			String stateUrl = "http://50.100.100.11:8080/api/v1/clusters/idpp/hosts/" + hostList.get(i) + "?fields=Hosts/host_state,Hosts/ip,Hosts/host_status";
+			
+			String name = hostList.get(i);
+			String host_state="";
+			String host_ip="";
+			String host_status="";
+			
+			
+			
+			try {
+				String host_result = GetRestResponse(stateUrl, authStringEnc);
+		        
+		        System.out.println("host_result : " + host_result);
+		        String json_hosts = JsonParsing(host_result, "Hosts");
+				host_state = JsonParsing(json_hosts, "host_state");
+				host_ip = JsonParsing(json_hosts, "ip");
+				host_status = JsonParsing(json_hosts, "host_status");
+				
+				System.out.println("host name : " + name);
+				System.out.println("host_state : " + host_state);
+				System.out.println("host_ip : " + host_ip);
+				System.out.println("host_status : " + host_status);
+				
+				ResponseModel r = new ResponseModel();
+				r.setHOST_NAME(name);
+				r.setHOST_INDEX(i+1);
+				r.setHOST_IP(host_ip);
+				r.setHOST_STATE_CODE(host_state);
+				r.setHOST_STATUS_CODE(host_status);
+				r.setLAST_CHECK_TIME(timenow);
+				
+				statelist.add(r);
+				
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		try {
+			TestDAO.InsertHostStateInfo(statelist);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void getNodeCntState(String authStringEnc) {
 		String requestURL = "http://50.100.100.11:8080/api/v1/clusters/idpp/services/HDFS/components/DATANODE?fields=ServiceComponentInfo";
 		String livenodeCnt = "";
@@ -282,19 +277,7 @@ public class MonitorService {
 		String timenow = "";
 		
 		try {
-			URL url = new URL(requestURL);
-	        URLConnection urlConnection = url.openConnection();
-	        urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-	        InputStream is = urlConnection.getInputStream();
-	        InputStreamReader isr = new InputStreamReader(is);
-
-	        int numCharsRead;
-	        char[] charArray = new char[1024];
-	        StringBuffer sb = new StringBuffer();
-	        while ((numCharsRead = isr.read(charArray)) > 0) {
-	            sb.append(charArray, 0, numCharsRead);
-	        }
-	        String result = sb.toString();
+			String result = GetRestResponse(requestURL, authStringEnc);
 	        
 	        String ServiceComponentInfo = JsonParsing(result, "ServiceComponentInfo");
 			
@@ -310,19 +293,7 @@ public class MonitorService {
 		String sec_requestURL = "http://50.100.100.11:8080/api/v1/clusters/idpp/services/HDFS/components/SECONDARY_NAMENODE";
 		
 		try {
-			URL url = new URL(sec_requestURL);
-	        URLConnection urlConnection = url.openConnection();
-	        urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-	        InputStream is = urlConnection.getInputStream();
-	        InputStreamReader isr = new InputStreamReader(is);
-
-	        int numCharsRead;
-	        char[] charArray = new char[1024];
-	        StringBuffer sb = new StringBuffer();
-	        while ((numCharsRead = isr.read(charArray)) > 0) {
-	            sb.append(charArray, 0, numCharsRead);
-	        }
-	        String result = sb.toString();
+			String result = GetRestResponse(sec_requestURL, authStringEnc);
 	        
 	        String serviceCompo = JsonParsing(result, "ServiceComponentInfo");
 			sec_state = JsonParsing(serviceCompo, "state");
@@ -341,19 +312,7 @@ public class MonitorService {
 		String namenode_url = "http://50.100.100.11:8080/api/v1/clusters/idpp/services/HDFS/components/NAMENODE?fields=ServiceComponentInfo/state,host_components";
 		
 		try {
-			URL url = new URL(namenode_url);
-	        URLConnection urlConnection = url.openConnection();
-	        urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-	        InputStream is = urlConnection.getInputStream();
-	        InputStreamReader isr = new InputStreamReader(is);
-
-	        int numCharsRead;
-	        char[] charArray = new char[1024];
-	        StringBuffer sb = new StringBuffer();
-	        while ((numCharsRead = isr.read(charArray)) > 0) {
-	            sb.append(charArray, 0, numCharsRead);
-	        }
-	        String result = sb.toString();
+			String result = GetRestResponse(namenode_url, authStringEnc);
 	        
 	        String ComponentINFO = JsonParsing(result, "ServiceComponentInfo");
 			nameState = JsonParsing(ComponentINFO, "state");
@@ -391,19 +350,7 @@ public class MonitorService {
 		String requestURL = "http://50.100.100.11:8080/api/v1/clusters/idpp/services/HDFS/components/NAMENODE";
 		
 		try {
-			URL url = new URL(requestURL);
-	        URLConnection urlConnection = url.openConnection();
-	        urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-	        InputStream is = urlConnection.getInputStream();
-	        InputStreamReader isr = new InputStreamReader(is);
-
-	        int numCharsRead;
-	        char[] charArray = new char[1024];
-	        StringBuffer sb = new StringBuffer();
-	        while ((numCharsRead = isr.read(charArray)) > 0) {
-	            sb.append(charArray, 0, numCharsRead);
-	        }
-	        String result = sb.toString();
+			String result = GetRestResponse(requestURL, authStringEnc);
 	        
 	        JSONArray arr= JsonArrayParsing(result, "host_components");
 	        JSONObject resultobj = (JSONObject)arr.get(0);
@@ -427,19 +374,7 @@ public class MonitorService {
 		String s_requestURL = "http://50.100.100.11:8080/api/v1/clusters/idpp/services/HDFS/components/SECONDARY_NAMENODE";
 		
 		try {
-			URL url = new URL(s_requestURL);
-	        URLConnection urlConnection = url.openConnection();
-	        urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-	        InputStream is = urlConnection.getInputStream();
-	        InputStreamReader isr = new InputStreamReader(is);
-
-	        int numCharsRead;
-	        char[] charArray = new char[1024];
-	        StringBuffer sb = new StringBuffer();
-	        while ((numCharsRead = isr.read(charArray)) > 0) {
-	            sb.append(charArray, 0, numCharsRead);
-	        }
-	        String result = sb.toString();
+			String result = GetRestResponse(s_requestURL, authStringEnc);
 	        
 	        JSONArray s_arr = JsonArrayParsing(result, "host_components");
 	        JSONObject s_resultobj = (JSONObject)s_arr.get(0);
@@ -464,19 +399,7 @@ public class MonitorService {
 		String d_requestURL = "http://50.100.100.11:8080/api/v1/clusters/idpp/services/HDFS/components/DATANODE";
 		
 		try {
-			URL url = new URL(d_requestURL);
-	        URLConnection urlConnection = url.openConnection();
-	        urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
-	        InputStream is = urlConnection.getInputStream();
-	        InputStreamReader isr = new InputStreamReader(is);
-
-	        int numCharsRead;
-	        char[] charArray = new char[1024];
-	        StringBuffer sb = new StringBuffer();
-	        while ((numCharsRead = isr.read(charArray)) > 0) {
-	            sb.append(charArray, 0, numCharsRead);
-	        }
-	        String result = sb.toString();
+			String result = GetRestResponse(d_requestURL, authStringEnc);
 	        
 	        JSONArray d_arr = JsonArrayParsing(result, "host_components");
 	        
@@ -501,6 +424,71 @@ public class MonitorService {
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
+		
+		
+	}
+
+	public static void getServerDiskInfo(String authStringEnc) throws ParseException {
+		
+		List<Map<String, Object>>perDisk = new ArrayList<Map<String, Object>>();
+		
+		Map<String, Object> lakeMap = new HashMap<String, Object>(); 
+		
+		List<DiskInfoVO> disklist = new ArrayList<DiskInfoVO>();
+		System.out.println("hostlist size : " + hostList.size());
+		
+		
+		for(int k=0; k<hostList.size(); k++) {
+			System.out.println("host" + k + ": " + hostList.get(k));
+			String url = "http://50.100.100.11:8080/api/v1/clusters/idpp/hosts/" + hostList.get(k) + "?fields=Hosts";
+			
+			String result = GetRestResponse(url, authStringEnc);
+			
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			String timenow = sdf.format(System.currentTimeMillis());
+			
+			String json_hosts = JsonParsing(result, "Hosts");
+			
+			JSONArray disk_info = JsonArrayParsing(json_hosts, "disk_info");
+			
+//			List<DiskInfoVO> disklist = new ArrayList<DiskInfoVO>();
+			
+			System.out.println("disk_info size : " + disk_info.size());
+			
+			
+			for(int i=0; i<disk_info.size(); i++) {
+				
+				JSONObject hostobj = (JSONObject)disk_info.get(i);
+	        	
+				String device = hostobj.get("device").toString();
+				String device_used = hostobj.get("used").toString();
+				String device_available = hostobj.get("available").toString();
+				String device_percent = hostobj.get("percent").toString();
+				String device_size = hostobj.get("size").toString();
+	        	
+				System.out.println("device : " + device);
+				System.out.println("device_used : " + device_used);
+				System.out.println("device_available : " + device_available);
+				System.out.println("device_percent : " + device_percent);
+				System.out.println("device_size : " + device_size);
+				
+				DiskInfoVO disk = new DiskInfoVO();
+				disk.setSERVER_NM(hostList.get(k));
+				disk.setDISK_NM(device);
+				disk.setDISK_AVAILABLE(device_available);
+				disk.setDISK_USED(device_used);
+				disk.setDISK_PERCENT(device_percent);
+				disk.setDISK_TOTAL(device_size);
+				disk.setUPDATE_TIME(timenow);
+				
+				disklist.add(disk); //lake1의 disk 3part 리스트
+				
+			}
+			lakeMap.put(hostList.get(k), disklist); // lake1, List(device 1,2,3) 
+		}
+		
+		perDisk.add(lakeMap);
+		TestDAO.insertLakeDeviceList(perDisk);
 		
 		
 	}

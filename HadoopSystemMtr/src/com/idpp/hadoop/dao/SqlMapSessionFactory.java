@@ -10,21 +10,25 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 public class SqlMapSessionFactory {
 
-	private static SqlSession session;
+	private static SqlSessionFactory sessionFactory;
 	
 	static {
 		try {
 			String resource = "mybatis-config.xml";
 			Reader reader = Resources.getResourceAsReader(resource);
-			SqlSessionFactory sqlMapper = new SqlSessionFactoryBuilder().build(reader);
 			
-			session = sqlMapper.openSession();
+			if(sessionFactory == null) {
+				sessionFactory = new SqlSessionFactoryBuilder().build(reader);
+			}
+//			SqlSessionFactory sqlMapper = new SqlSessionFactoryBuilder().build(reader);
+			
+//			session = sqlMapper.openSession();
 		}catch(IOException e) {
 			e.printStackTrace();
 		}
 	}
-	public static SqlSession getSqlSession() {
-		return session;
+	public static SqlSessionFactory getSqlSessionFactory() {
+		return sessionFactory;
 	}
 }
 
