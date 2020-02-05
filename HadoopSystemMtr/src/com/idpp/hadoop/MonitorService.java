@@ -82,7 +82,7 @@ public class MonitorService {
 			
 			String cpu_idle = JsonParsing(cpu, "cpu_idle");
 			cpu_idle = String.format("%.2f", Double.parseDouble(cpu_idle));
-			String FSNamesystem = JsonParsing(dfs, "FSNamesystem");  //ÀÚ²Ù nullpointer
+			String FSNamesystem = JsonParsing(dfs, "FSNamesystem");  
 			String CapacityTotalGB = JsonParsing(FSNamesystem, "CapacityTotalGB"); // DFS_DISK_TOTAL
 			String CapacityUsedGB = JsonParsing(FSNamesystem, "CapacityUsedGB"); //column DFS_DISK_USED
 			String CapacityRemainingGB = JsonParsing(FSNamesystem, "CapacityRemainingGB"); //column DFS_DISK_REMAINING
