@@ -23,7 +23,10 @@ public class MonitorMain {
         /*db 에 저장 안함 */
 //        MonitorService.getNodeCntState(authStringEnc); //livenode, total node, state 정보
 //        MonitorService.getNodeRoles(authStringEnc); 
+         
         
+        
+        //to commit
         
 	}
 
